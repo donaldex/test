@@ -1,4 +1,4 @@
-;   Example script to produce standard plots for a WRF quarter_ss run
+;;;;;;;;;;;   Example script to produce standard plots for a WRF quarter_ss run
 
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/wrf/WRFUserARW.ncl"
