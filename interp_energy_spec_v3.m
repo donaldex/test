@@ -1,4 +1,4 @@
-function x=interp_energy_spec_v2
+function x=interp_energy_spec_v3
 %%indepedent program
 
 w_in=ncread('wrfout_d01_0001-01-01_00:00:00','W');
@@ -7,32 +7,34 @@ phb=ncread('wrfout_d01_0001-01-01_00:00:00','PHB');
 z=(ph+phb)/9.8;
 time=21;
 deltax=1000;
+h=5000;  %%%height
 [nx,ny,nz,nt]=size(w_in);
 %N=[1:nx]
 %M=[1:ny]
 %P=[1:nz]
-w=w_in(:,:,1:10,time);
-z=z(:,:,1:10,time);
-z=double(z);
-w=double(w);
-X1=zeros(size(z));
-Y1=zeros(size(z));
-
-
+w=w_in(:,:,:,time);
+z=z(:,:,:,time);
+p=0;
+W_XY=zeros(size(z));
+W_XY=W_XY(:,:,1);
+%%%%%%%%%%%%%%%%%%%interpolation W_XY at height h
 for i=1:nx
-    X1(i,:,:)=(i-1)*deltax;
+   for j=1:ny
+       p=0;
+       for k=1:nz
+     if (z(k)<=h && z(k+1)>=h)
+         p=(h-z(k))/(z(k+1)-z(k));
+         W_XY(i,j)=w(k)+(w(k+1)-w(k))*p;
+         k
+      end  
+       end
+   end
 end
 
-for j=1:ny
-  Y1(:,j,:)=(j-1)*deltax;
-end
 
-XQ=X1(:,:,1);
-YQ=Y1(:,:,1);
-ZQ=X1(:,:,1);
-ZQ(:,:)=500;
 
-wq=interp3(X1,Y1,z,w,XQ,YQ,ZQ);
+
+
 %[nx,ny,nz]=size(wq);
 avgy_wq=zeros(nx);
 flu_wq=zeros(nx,ny);
@@ -47,13 +49,13 @@ sumy_wq=zeros(nx);
 
 
 for i=1:nx
-    avgy_wq(i)=sum(wq(i,:))/ny;
+    avgy_wq(i)=sum(W_XY(i,:))/ny;
 end 
 
 for j=1:ny
     for i=1:nx
    %flu_w(:,j,:)=w(:,j,:)-avgy_w
-   flu_wq(i,j)=wq(i,j)-avgy_wq(i);
+   flu_wq(i,j)=W_XY(i,j)-avgy_wq(i);
     end
 end
 
@@ -64,20 +66,19 @@ for i=1:nx
 sumy_wq(i)=sum(flu_w_line(i,:));
 end
 
-maxi=0;
-max_sumy_wq=0;
+%max_sumy_wq=0;
 
-for i=1:nx    
-      if sumy_wq(i)>max_sumy_wq
-          maxi=i;
-          max_sumy_wq=sumy_wq(i);
-      end
-end
-
+%for i=1:nx    
+%      if sumy_wq(i)>max_sumy_wq
+%          maxi=i;
+%          max_sumy_wq=sumy_wq(i);
+%      end
+%end
+maxi= sumy_wq==max(sumy_wq);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%FFT
-uy1=wq(maxi,:);
+uy1=W_XY(maxi,:);
 N=size(uy1);
 N=N(2);
 
