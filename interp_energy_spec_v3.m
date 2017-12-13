@@ -21,7 +21,7 @@ W_XY=W_XY(:,:,1);
 for i=1:nx
    for j=1:ny
        p=0;
-       for k=1:nz
+       for k=1:nz-1
      if (z(k)<=h && z(k+1)>=h)
          p=(h-z(k))/(z(k+1)-z(k));
          W_XY(i,j)=w(k)+(w(k+1)-w(k))*p;
